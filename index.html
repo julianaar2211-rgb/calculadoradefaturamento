@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora de Aumento de Faturamento</title>
+<style>
+:root{--azul:#005eb8;--azul-escuro:#003b73;--verde:#178a52;--vermelho:#c0392b;--cinza:#5f6b76;--borda:#dce3ea;--texto:#1d2733}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;color:var(--texto);background:linear-gradient(180deg,#eef6ff 0%,#f8fafc 40%,#fff 100%)}
+.topbar{background:var(--azul);color:#fff;padding:14px 22px;box-shadow:0 2px 10px rgba(0,0,0,.08)}
+.topbar-inner{max-width:1050px;margin:auto;display:flex;justify-content:space-between;gap:20px}
+.brand{font-weight:700;font-size:17px}.tag{font-size:12px;opacity:.9}
+main{max-width:1050px;margin:18px auto 28px;padding:0 16px}
+.hero{text-align:center;margin-bottom:14px}
+.hero h1{margin:0 0 6px;color:var(--azul-escuro);font-size:clamp(24px,4vw,36px)}
+.hero p{max-width:760px;margin:auto;color:var(--cinza);font-size:14px;line-height:1.4}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+.card{background:#fff;border:1px solid var(--borda);border-radius:15px;padding:16px;box-shadow:0 8px 24px rgba(37,61,86,.07)}
+.card h2{margin:0 0 4px;font-size:20px;color:var(--azul-escuro)}
+.muted{color:var(--cinza);font-size:12.5px;line-height:1.35;margin:0 0 12px}
+.field{margin-bottom:10px}
+label{display:block;font-weight:700;margin-bottom:5px;font-size:13px}
+input{width:100%;border:1px solid #cfd8e3;border-radius:9px;padding:11px 12px;font-size:15px;outline:none}
+input:focus{border-color:var(--azul);box-shadow:0 0 0 3px rgba(0,94,184,.12)}
+.date-wrap{display:grid;grid-template-columns:1fr auto;gap:8px;position:relative}
+.calendar-btn{width:auto;padding:0 13px;background:#edf3f8;color:#24425c;font-size:18px}
+.hint{background:#f4f8fc;border-left:4px solid var(--azul);border-radius:8px;padding:8px 10px;color:#475462;font-size:11.5px;line-height:1.35;margin:2px 0 9px}
+.info-compact{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 10px}
+.info-compact div{background:#f9fbfd;border:1px solid var(--borda);border-radius:8px;padding:8px 9px;color:#52606d;font-size:11px;line-height:1.35}
+button{width:100%;border:none;border-radius:9px;padding:11px 14px;font-size:14px;font-weight:700;cursor:pointer}
+.btn-primary{background:var(--azul);color:#fff}.btn-secondary{margin-top:7px;background:#edf3f8;color:#24425c}
+.result{min-height:365px;display:flex;flex-direction:column;justify-content:center}
+.empty{text-align:center;color:var(--cinza);padding:22px 10px}.empty-icon{font-size:36px;margin-bottom:6px}
+.result-box{display:none}
+.status{display:inline-flex;align-items:center;gap:8px;font-weight:700;border-radius:999px;padding:6px 10px;font-size:12px;margin-bottom:12px}
+.status.up{background:#eaf7f0;color:var(--verde)}.status.down{background:#fdeeee;color:var(--vermelho)}.status.same{background:#eef2f5;color:#52606d}
+.big-number{font-size:clamp(36px,6vw,52px);font-weight:800;line-height:1;margin:2px 0 8px;color:var(--azul-escuro)}
+.result-text{font-size:14px;line-height:1.45;color:#3f4b57;margin-bottom:12px}
+.feedback-message{display:none;margin:4px 0 16px;padding:18px 20px;border-radius:12px;font-size:22px;font-weight:800;line-height:1.3;text-align:center;box-shadow:0 4px 14px rgba(0,0,0,.06)}
+.feedback-message.up{display:block;background:#eaf7f0;color:var(--verde);border:1px solid #c9ead8}
+.feedback-message.down{display:block;background:#fdeeee;color:var(--vermelho);border:1px solid #f3caca}
+.metrics{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:10px}
+.metric{background:#f7fafc;border:1px solid var(--borda);border-radius:9px;padding:10px}
+.metric span{display:block;color:var(--cinza);font-size:10.5px;margin-bottom:3px}.metric strong{font-size:15px}
+.copybox{background:#f7f9fb;border:1px dashed #b8c5d1;border-radius:9px;padding:10px;font-size:12.5px;line-height:1.4;color:#33414f;margin-top:7px}
+.error{color:var(--vermelho);font-size:11.5px;margin-top:6px;display:none}
+footer{text-align:center;color:#768391;font-size:10.5px;padding:14px}
+.hidden-date{position:absolute;right:0;top:0;opacity:0;width:46px;height:100%;pointer-events:none}
+@media(max-width:800px){.grid{grid-template-columns:1fr}.info-compact,.metrics{grid-template-columns:1fr}.topbar-inner{flex-direction:column}.result{min-height:auto}}
+</style>
+</head>
+<body>
+<header class="topbar"><div class="topbar-inner"><div class="brand">Calculadora de Aumento de Faturamento</div><div class="tag">Ferramenta de apoio ao acompanhamento de resultados</div></div></header>
+<main>
+<section class="hero"><h1>Calcule a variação do faturamento</h1><p>Compare o faturamento do mês inicial com o mês atual para identificar aumento, redução ou manutenção.</p></section>
+<section class="grid">
+<div class="card">
+<h2>Informe os dados</h2>
+<p class="muted">Digite o mês e o ano ou clique no ícone de calendário do próprio campo para selecionar.</p>
+<div class="field"><label for="mesInicial">Mês inicial</label><div class="date-wrap"><input id="mesInicial" type="text" inputmode="numeric" placeholder="MM/AAAA" maxlength="7"><button class="calendar-btn" type="button" onclick="abrirCalendario('calInicial')">📅</button><input id="calInicial" class="hidden-date" type="month" onchange="preencherMes('calInicial','mesInicial')"></div></div>
+<div class="field"><label for="faturamentoInicial">Faturamento inicial</label><input id="faturamentoInicial" type="text" inputmode="decimal" placeholder="R$ 0,00"></div>
+<div class="field"><label for="mesAtual">Mês atual</label><div class="date-wrap"><input id="mesAtual" type="text" inputmode="numeric" placeholder="MM/AAAA" maxlength="7"><button class="calendar-btn" type="button" onclick="abrirCalendario('calAtual')">📅</button><input id="calAtual" class="hidden-date" type="month" onchange="preencherMes('calAtual','mesAtual')"></div></div>
+<div class="field"><label for="faturamentoAtual">Faturamento atual</label><input id="faturamentoAtual" type="text" inputmode="decimal" placeholder="R$ 0,00"></div>
+<div class="hint"><strong>Atenção:</strong> compare períodos equivalentes para evitar distorções no resultado.</div>
+<div class="info-compact"><div><strong>Como o cálculo é feito?</strong><br>Variação (%) = ((Faturamento atual − Faturamento inicial) ÷ Faturamento inicial) × 100.</div><div><strong>O que considerar como faturamento?</strong><br>Use o valor total das vendas ou receitas e mantenha o mesmo critério nos dois períodos.</div></div>
+<button class="btn-primary" onclick="calcular()">Calcular variação</button><button class="btn-secondary" onclick="limpar()">Limpar campos</button><div id="erro" class="error">Preencha corretamente os meses e os valores de faturamento.</div>
+</div>
+<div class="card result"><div id="emptyState" class="empty"><div class="empty-icon">📊</div><strong>Seu resultado aparecerá aqui</strong><p>Preencha os dados e clique em “Calcular variação”.</p></div><div id="resultBox" class="result-box"><div id="status" class="status"></div>
+<div id="feedbackMessage" class="feedback-message"></div><div id="percentual" class="big-number">0%</div><div id="descricao" class="result-text"></div><div class="metrics"><div class="metric"><span>Diferença em reais</span><strong id="diferenca">R$ 0,00</strong></div><div class="metric"><span>Situação</span><strong id="situacao">-</strong></div></div><div class="copybox" id="textoCopiar"></div><button class="btn-secondary" onclick="copiarResultado(event)">Copiar resultado</button></div></div>
+</section>
+</main>
+<footer>Os dados informados não são armazenados.</footer>
+<script>
+const fatInicial=document.getElementById('faturamentoInicial');const fatAtual=document.getElementById('faturamentoAtual');
+[fatInicial,fatAtual].forEach(input=>{input.addEventListener('input',()=>{let v=input.value.replace(/\D/g,'');if(!v){input.value='';return;}v=(parseInt(v,10)/100).toFixed(2);input.value=new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(v);});});
+['mesInicial','mesAtual'].forEach(id=>{const campo=document.getElementById(id);campo.addEventListener('input',()=>{let v=campo.value.replace(/\D/g,'').slice(0,6);if(v.length>=3)v=v.slice(0,2)+'/'+v.slice(2);campo.value=v;});});
+function abrirCalendario(id){const el=document.getElementById(id);if(el.showPicker)el.showPicker();else el.click();}
+function preencherMes(calId,textId){const valor=document.getElementById(calId).value;if(!valor)return;const [ano,mes]=valor.split('-');document.getElementById(textId).value=`${mes}/${ano}`;}
+function moedaParaNumero(valor){if(!valor)return NaN;return Number(valor.replace(/\s/g,'').replace('R$','').replace(/\./g,'').replace(',','.'));}
+function formatarMoeda(valor){return new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(valor);}
+function validarMes(valor){const m=/^(\d{2})\/(\d{4})$/.exec(valor);if(!m)return false;const mes=Number(m[1]);return mes>=1&&mes<=12;}
+function formatarMes(valor){const [mes,ano]=valor.split('/');const nomes=['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];return `${nomes[Number(mes)-1]} de ${ano}`;}
+function formatarPercentual(valor){return Math.round(valor)+'%';}
+function calcular(){const a=moedaParaNumero(fatInicial.value);const b=moedaParaNumero(fatAtual.value);const mi=document.getElementById('mesInicial').value.trim();const ma=document.getElementById('mesAtual').value.trim();const erro=document.getElementById('erro');if(isNaN(a)||isNaN(b)||a<0||b<0||!validarMes(mi)||!validarMes(ma)){erro.style.display='block';return;}erro.style.display='none';const mesInicial=formatarMes(mi);const mesAtual=formatarMes(ma);const diferenca=b-a;let percentual,situacao,classe,icone;if(a===0&&b===0){percentual=0;situacao='Faturamento mantido';classe='same';icone='●';}else if(a===0&&b>0){percentual=null;situacao='Início de faturamento';classe='up';icone='▲';}else{percentual=((b-a)/a)*100;if(percentual>0){situacao='Aumento de faturamento';classe='up';icone='▲';}else if(percentual<0){situacao='Redução de faturamento';classe='down';icone='▼';}else{situacao='Faturamento mantido';classe='same';icone='●';}}document.getElementById('emptyState').style.display='none';document.getElementById('resultBox').style.display='block';const status=document.getElementById('status');status.className='status '+classe;status.textContent=icone+' '+situacao;
+const feedbackMessage=document.getElementById('feedbackMessage');
+feedbackMessage.className='feedback-message';
+feedbackMessage.textContent='';
+const percentualArredondado = percentual===null ? null : Math.round(percentual);
+if(percentualArredondado!==null && percentualArredondado>=12){
+  feedbackMessage.className='feedback-message up';
+  feedbackMessage.textContent='Parabéns, você atingiu a meta de aumento de faturamento e está no caminho certo!';
+}else if(percentualArredondado!==null && percentualArredondado>=1 && percentualArredondado<=11){
+  feedbackMessage.className='feedback-message up';
+  feedbackMessage.textContent='Muito bem, seu faturamento aumentou! Você está evoluindo, mas ainda pode melhorar. Procure o Gestor do Sebrae responsável pela sua empresa para obter apoio.';
+}else if(percentualArredondado!==null && percentualArredondado<0){
+  feedbackMessage.className='feedback-message down';
+  feedbackMessage.textContent='Procure urgente o Gestor do Sebrae responsável pela sua empresa para obter ajuda.';
+}
+document.getElementById('percentual').textContent=percentual===null?'Não aplicável':formatarPercentual(percentual);document.getElementById('descricao').textContent=percentual===null?`O faturamento passou de ${formatarMoeda(a)} em ${mesInicial} para ${formatarMoeda(b)} em ${mesAtual}. Como o faturamento inicial era zero, não é possível calcular uma variação percentual convencional.`:`O faturamento passou de ${formatarMoeda(a)} em ${mesInicial} para ${formatarMoeda(b)} em ${mesAtual}.`;document.getElementById('diferenca').textContent=(diferenca>0?'+ ':diferenca<0?'- ':'')+formatarMoeda(Math.abs(diferenca));document.getElementById('situacao').textContent=situacao;let texto;if(percentual===null){texto=`O faturamento passou de ${formatarMoeda(a)} em ${mesInicial} para ${formatarMoeda(b)} em ${mesAtual}. Como o faturamento inicial era zero, não se aplica o cálculo percentual de crescimento.`;}else if(percentual>0){texto=`O faturamento passou de ${formatarMoeda(a)} em ${mesInicial} para ${formatarMoeda(b)} em ${mesAtual}, representando aumento de ${formatarPercentual(percentual)}.`;}else if(percentual<0){texto=`O faturamento passou de ${formatarMoeda(a)} em ${mesInicial} para ${formatarMoeda(b)} em ${mesAtual}, representando redução de ${formatarPercentual(Math.abs(percentual))}.`;}else{texto=`O faturamento foi de ${formatarMoeda(a)} em ${mesInicial} e permaneceu em ${formatarMoeda(b)} em ${mesAtual}, sem variação percentual.`;}document.getElementById('textoCopiar').textContent=texto;}
+function limpar(){document.getElementById('mesInicial').value='';document.getElementById('mesAtual').value='';fatInicial.value='';fatAtual.value='';document.getElementById('erro').style.display='none';document.getElementById('emptyState').style.display='block';document.getElementById('resultBox').style.display='none';
+const feedback=document.getElementById('feedbackMessage');
+if(feedback){feedback.className='feedback-message';feedback.textContent='';}}
+async function copiarResultado(event){const texto=document.getElementById('textoCopiar').textContent;if(!texto)return;try{await navigator.clipboard.writeText(texto);const botao=event.currentTarget,original=botao.textContent;botao.textContent='Resultado copiado!';setTimeout(()=>botao.textContent=original,1500);}catch(e){alert('Selecione o texto acima e copie manualmente.');}}
+</script>
+</body>
+</html>
